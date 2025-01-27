@@ -24,6 +24,21 @@
         a:hover {
             text-decoration: underline;
         }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+        /* Box Styling for Alerts */
+        .alert-box {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px solid red;
+            background-color: #f8d7da;
+            color: red;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -36,8 +51,53 @@
         <li><a href="/snort_alerts_search.php">Snort Alerts Search</a></li>
         <li><a href="/admin">Admin Tools</a></li>
     </ul>
+
+    <!-- Alert Box -->
+    <div id="alertBox" class="alert-box">
+        <p><span id="alertTime"></span> - <span id="alertType"></span></p>
+    </div>
+
     <footer>
         <p>&copy; 2025 Your Server | Powered by Apache</p>
     </footer>
+
+    <script>
+        // Fetch alerts and display them if found
+        fetch('/snort_alerts_fetch_index.php')
+            .then(response => {
+                // Check if the response is OK (status 200)
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetched alerts:', data);  // Log the data for debugging
+                if (data.alerts && data.alerts.length > 0) {
+                    const alert = data.alerts[0];  // Get the first alert
+                    const alertBox = document.getElementById('alertBox');
+                    const alertTime = document.getElementById('alertTime');
+                    const alertType = document.getElementById('alertType');
+
+                    alertTime.textContent = alert.timestamp;
+                    alertType.textContent = alert.details;
+
+                    // Show the alert box
+                    alertBox.style.display = 'block';
+                } else {
+                    // No alerts found
+                    console.log('No alerts found');
+                    const alertBox = document.getElementById('alertBox');
+                    alertBox.style.display = 'none';  // Hide the alert box if no alerts
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching alerts:', error);
+                // Optionally display a message in the alert box
+                const alertBox = document.getElementById('alertBox');
+                alertBox.style.display = 'block';
+                alertBox.innerHTML = 'Error loading alerts.';
+            });
+    </script>
 </body>
 </html>
